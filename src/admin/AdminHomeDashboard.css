@@ -1,0 +1,176 @@
+#AdminHomeDashboardWrapper{
+	width: 100%;
+	height: 100%;
+	position: fixed;
+}
+#AdminContentWrapper{
+	background-color: #fff;
+	width: 1100px;
+	height: 550px;
+	top: 5%;
+	position: relative;
+	left: 10%;
+	-webkit-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	-moz-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	border-radius: 20px;
+}
+#AdminHeaderWrapper{
+	height: 50px;
+	position: relative;
+	width:93%;
+	left:3.5%;
+	top:5px;
+}
+#AdminDataSection{
+	height: 450px;
+	position: relative;
+	width: 93%;
+	left: 3.5%;
+	top: 15px;
+}
+#SearchBarWrapper{
+	width: 230px;
+	position: relative;
+	display: inline-block;
+	height:100%;
+}
+#SearchBarIcon{
+	width:14%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#SearchInput{
+	width: 75%;
+	display: inline-block;
+	position: relative;
+	margin-top: 4px;
+	height: 80%;
+	outline: none;
+	padding-left: 5px;
+	background-color:rgba(0, 0, 0, 0);
+	border: none;
+	border-bottom: solid;
+	font-weight: bold;
+	font-size: 15px;
+	font-family: 'Nunito-Regular';
+}
+#ModifyRangeWrapper{
+	width: 150px;
+	height: 100%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 10px;
+}
+#ModifyRangeIcon{
+	width:20%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#ModifyRangeLabel{
+	width: 65%;
+	text-align: center;
+	position: relative;
+	height:80%;
+	padding-top: 6px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
+#AddCallSignWrapper{
+	width: 150px;
+	height: 100%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 20px;
+}
+#AddCallSignIcon{
+	width:20%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#AddCallSignLabel{
+	width: 70%;
+	text-align: center;
+	position: relative;
+	height:70%;
+	padding-top: 10px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
+#LoginsMadeWrapper{
+	width: 150px;
+	height: 100%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 30px;
+}
+#LoginsMadeIcon{
+	width:20%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#LoginsMadeLabel{
+	width: 70%;
+	text-align: center;
+	position: relative;
+	height:70%;
+	padding-top: 10px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
+#OptionsWrapper{
+	width: 110px;
+	height: 100%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 190px;
+}
+#OptionsIcon{
+	width:25%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#OptionsLabel{
+	width: 60%;
+	text-align: center;
+	position: relative;
+	height:70%;
+	padding-top: 10px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
+
+

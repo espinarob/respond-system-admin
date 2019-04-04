@@ -6,14 +6,14 @@
 
 #LoginContentWrapper{
 	background-color: #fff;
-	width: 40%;
-	height: 80%;
+	width: 550px;
+	height: 500px;
 	top: 5%;
 	position: relative;
 	left: 30%;
-	-webkit-box-shadow: 0px 2px 35px -5px rgba(0,0,0,0.75);
-	-moz-box-shadow: 0px 2px 35px -5px rgba(0,0,0,0.75);
-	box-shadow: 0px 2px 35px -5px rgba(0,0,0,0.75);
+	-webkit-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	-moz-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
 	border-radius: 20px;
 }
 
@@ -22,7 +22,6 @@
 	width:90%;
 	position: relative;
 	left: 5%;
-	vertical-align: middle;
 	text-align: center;
 	font-size: 25px;
 	font-weight: bold;
@@ -39,13 +38,124 @@
 	width: 40%;	
 	position: relative;
 	left: 15%;
-	top: 10%;
+	top: 14%;
 }
 
 #UsernameSection{
-	width:90%;
+	width:100%;
 	position: relative;
-	left: 5%;
 	height:9%;
-	top: 10%;
+	top: 16%;
+	margin: 0;
+	padding: 0;
+}
+
+#UsernameIcon{
+	width:6.5%;
+	padding-left: 2px;
+	padding-top: 3px;
+	height: 94%;
+	font-size: 30px;
+	left: 20%;
+	position: relative;
+	display: inline-block;
+}
+
+#UsernameInput{
+	width: 45%;
+	position: relative;
+	display: inline-block;
+	outline: none;
+	padding-left: 3px;
+	background-color:rgba(0, 0, 0, 0);
+	border: none;
+	left: 23%;
+	height: 100%;
+	border-bottom: solid;
+	font-family: 'Nunito-Regular';
+	vertical-align: top;
+}
+
+#PasswordLabel{
+	vertical-align: middle;
+	text-align: left;
+	font-size:15px;
+	height:4.3%;
+	font-weight: bold;
+	color: #5b5e5d;
+	width: 40%;	
+	position: relative;
+	left: 15%;
+	top: 18%;
+}
+
+
+#PasswordSection{
+	width:100%;
+	position: relative;
+	height:9%;
+	top: 20%;
+	margin: 0;
+	padding: 0;
+}
+
+#PasswordIcon{
+	width:6.5%;
+	padding-left: 2px;
+	padding-top: 3px;
+	height: 94%;
+	font-size: 30px;
+	left: 20%;
+	position: relative;
+	display: inline-block;
+}
+
+#PasswordInput{
+	width: 45%;
+	position: relative;
+	display: inline-block;
+	outline: none;
+	padding-left: 3px;
+	font-family: 'Nunito-Regular';
+	background-color:rgba(0, 0, 0, 0);
+	border: none;
+	left: 23%;
+	height: 100%;
+	border-bottom: solid;
+	vertical-align: top;
+}
+
+#ShowPasswordButton{
+	height:40%;
+	position: relative;
+	width:17%;
+	padding-left: 2px;
+	font-size: 13px;
+	top: 50%;
+	display: inline-block;
+	left: 23%;
+	cursor: pointer;
+}
+
+#ErrorDisplay{
+	width:50%;
+	left: 25%;
+	height:9%;
+	font-size: 16px;
+	text-align: center;
+	position: relative;
+	top: 23%;
+}
+
+#LoginSubmit{
+	height: 32px;
+	text-align: center;
+	width: 20%;
+	position: relative;
+	left: 40%;
+	font-weight: bold;
+	cursor: pointer;
+	border: solid;
+	top: 26%;
+	padding-top: 5px;
 }
