@@ -18,7 +18,7 @@ class PopUpContent extends Component {
         			<IoMdCloseCircle/>
         		</p>
         		<div id = 'PopUpOperations'>
-        			{this.props.doGetOptionsContent}
+        			{this.props.doGetPopUpContent}
         		</div>
         	</div>
     	);

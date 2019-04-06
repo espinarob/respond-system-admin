@@ -17,15 +17,93 @@ class App extends Component {
         showPopUpContent     : false,
         loginError           : '',
         loadingMessage       : '',
-        OptionsContent       : <React.Fragment></React.Fragment>
+        popUpContent         : <React.Fragment></React.Fragment>
     }
 
     // == For PopUp Content Data == //
-    changeOptionsContent =(data)=>{
-        this.setState({OptionsContent:data});
+    changePopUpContent =(data)=>{
+        this.setState({popUpContent:data});
     }
 
-    // == End for PopUp Content DAta == // 
+    submitModifiedCenterRange = (radius,latitude,longitude)=>{
+        this.setState({loadingMessage:'Submitting changes, please wait..'});
+        firebase
+            .database()
+            .ref("Center")
+            .update({
+                longitude : Number(longitude),
+                latitude  : Number(latitude),
+                radius    : Number(radius)
+            })
+            .then(()=>{
+                this.setState({loadingMessage:'Successfully Updted!'});
+                setTimeout(()=>{
+                    this.togglePopUpContent();
+                    this.setState({loadingMessage:''});
+                },Constants.ERROR_DISPLAY_TIME);
+            });
+    }
+
+
+    submitNewOrganization = (name)=>{
+        this.setState({loadingMessage:'Submitting organization, please wait..'});
+        firebase
+            .database()
+            .ref()
+            .child("Organizations")
+            .orderByChild("Name")
+            .equalTo(String(name))
+            .once("value",snapshot=>{
+                if(!(snapshot.exists())){
+                    console.log('not-taken');
+                    firebase
+                        .database()
+                        .ref("Organizations/"+String(name))
+                        .update({
+                            'Name' : name
+                        })
+                        .then(()=>{
+                            this.setState({loadingMessage:'Successfully Added!'});
+                            setTimeout(()=>{
+                                this.togglePopUpContent();
+                                this.setState({loadingMessage:''});
+                            },Constants.ERROR_DISPLAY_TIME);
+                        });
+                }
+                else{
+                    this.setState({loadingMessage : 'Organization name already exists!'});
+                    setTimeout(()=>{
+                        this.setState({loadingMessage:''});
+                    },Constants.ERROR_DISPLAY_TIME);
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+                this.setState({loadingMessage : 'Error connecting to server'});
+                setTimeout(()=>{
+                    this.setState({loadingMessage:''});
+                },Constants.ERROR_DISPLAY_TIME);
+            });
+       
+    }
+
+    submitNewCallSign = (data)=>{
+        firebase
+            .database
+            .ref("CallSigns")
+            .push()
+            .update({
+                'ID'   : String(data.ID),
+                'Name' : String(data.Name),
+                'Organization' : String(data.Organization),
+                'Status' : Constants.CALL_SIGN_STATUS.NOT_TAKEN 
+            })
+            .then(()=>{
+
+            });
+    }
+
+    // == End for PopUp Content Data == // 
 
     manipulatePopUpContent = (toggleFlag)=>{
         this.setState({showPopUpContent:toggleFlag});
@@ -129,13 +207,16 @@ class App extends Component {
         switch(this.state.applicationOperation){
             case Constants.PAGES.LOGIN_PAGE:
                 return  <LoginComponent 
-                            doSubmitAdminLogin       = {this.submitAdminPageLogin}
-                            doGetLoginError          = {this.state.loginError} />;
+                            doSubmitAdminLogin         = {this.submitAdminPageLogin}
+                            doGetLoginError            = {this.state.loginError} />;
             case Constants.PAGES.ADMIN_HOME_PAGE:
                 return <AdminHomeDashboard
-                            doTogglePopUpContent     = {this.togglePopUpContent}
-                            doChangeOptionsContent   = {this.changeOptionsContent}
-                            doLogoutAdminCredentials = {this.logoutAdminCredentials} />;
+                            doGetFirebaseObject        = {firebase}
+                            doTogglePopUpContent       = {this.togglePopUpContent}
+                            doChangePopUpContent       = {this.changePopUpContent}
+                            doSubmitModifiedCenter     = {this.submitModifiedCenterRange}
+                            doSubmitNewOrganization    = {this.submitNewOrganization}
+                            doLogoutAdminCredentials   = {this.logoutAdminCredentials} />;
         }
     }
 
@@ -147,7 +228,7 @@ class App extends Component {
                 </div>
                 {(this.state.showPopUpContent == true ? <PopUpContent
                     doManipulatePopUpContent = {this.manipulatePopUpContent}
-                    doGetOptionsContent      = {this.state.OptionsContent} />  : <React.Fragment></React.Fragment>)}
+                    doGetPopUpContent        = {this.state.popUpContent} />  : <React.Fragment></React.Fragment>)}
                 {(this.state.loadingMessage.length!=0 ? <LoadingScreen 
                     doGetLoadMessage = {this.state.loadingMessage} /> : <React.Fragment></React.Fragment> )}
             </React.Fragment>

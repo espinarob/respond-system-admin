@@ -11,6 +11,16 @@ const Constants = {
 	    storageBucket           : "resys-respondsystem.appspot.com",
 	    messagingSenderId       : "208216134504"
 	},
+	POP_UP_CONTENT              : {
+		MODIFY_CENTER           : 'MODIFY_CENTER',
+		OPTIONS                 : 'OPTIONS',
+		ADD_ORGANIZATION        : 'ADD_ORGANIZATION',
+		ADD_CALL_SIGNS          : 'ADD_CALL_SIGNS'
+	},
+	CALL_SIGN_STATUS            : {
+		TAKEN                   : 'TAKEN',
+		NOT_TAKEN               : 'NOT_TAKEN'
+	},
 	ERROR_DISPLAY_TIME : 3000,
 	RES_SYS_ADMIN_USERNAME_KEY  : 'RES_SYS_ADMIN_USERNAME_KEY',
 	RES_SYS_ADMIN_PASSOWRD_KEY  : 'RES_SYS_ADMIN_PASSOWRD_KEY'

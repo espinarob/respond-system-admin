@@ -88,6 +88,34 @@
 	display: inline-block;
 	font-family: 'Nunito-Regular';
 }
+#AddOrganizationWrapper{
+	width: 150px;
+	height: 100%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 20px;
+}
+#AddOrganizationIcon{
+	width:20%;
+	position: relative;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 5px;
+	font-weight: bold;
+	height: 80%;
+	display: inline-block;
+}
+#AddOrganizationLabel{
+	width: 70%;
+	text-align: center;
+	position: relative;
+	height:70%;
+	padding-top: 8px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
 #AddCallSignWrapper{
 	width: 150px;
 	height: 100%;
@@ -150,7 +178,7 @@
 	position: relative;
 	display: inline-block;
 	cursor: pointer;
-	left: 190px;
+	left: 110px;
 }
 #OptionsIcon{
 	width:25%;
