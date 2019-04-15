@@ -9,11 +9,11 @@
 	height: 550px;
 	top: 5%;
 	position: relative;
-	left: 10%;
 	-webkit-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
 	-moz-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
 	box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
 	border-radius: 20px;
+	margin: 0 auto;
 }
 #AdminHeaderWrapper{
 	height: 50px;
@@ -200,5 +200,37 @@
 	display: inline-block;
 	font-family: 'Nunito-Regular';
 }
-
-
+#DataChoiceHeader{
+	height: 8%;
+	width: 100%;
+	position: relative;
+}
+#BystandersButtonSection,#RespondersButtonSection,#IncidentButtonSection{
+	position: relative;
+	display: inline-block;
+	margin-right: 10px;
+	width: 10%;
+	height: 65%;
+	text-align: center;
+	cursor: pointer;
+	padding-top: 7px;
+	font-size: 15px;
+	display: inline-block;
+	font-family: 'Nunito-Regular';
+}
+#BystandersButtonSection{
+	border-bottom: solid;
+}
+#AdminContentDataWrapper{
+	height: 88%;
+	width: 100%;
+	position: relative;
+	overflow: scroll;
+	overflow-x:hidden;
+	top:5px;
+}
+#ViewDataWrapper{
+	-webkit-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	-moz-box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+	box-shadow: 0px 4px 17px -6px rgba(0,0,0,0.75);
+}

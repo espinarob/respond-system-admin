@@ -88,18 +88,70 @@ class App extends Component {
     }
 
     submitNewCallSign = (data)=>{
+        this.setState({loadingMessage : 'Submitting call sign, please wait..'});
         firebase
-            .database
-            .ref("CallSigns")
-            .push()
-            .update({
-                'ID'   : String(data.ID),
-                'Name' : String(data.Name),
-                'Organization' : String(data.Organization),
-                'Status' : Constants.CALL_SIGN_STATUS.NOT_TAKEN 
+            .database()
+            .ref()
+            .child("CallSigns")
+            .orderByChild("ID")
+            .equalTo(String(data.ID))
+            .once("value",snapshot=>{
+                if(snapshot.exists()){
+                    const callSignInformationWithKey = JSON.parse(JSON.stringify(snapshot.val()));
+                    const callSignKey                = Object.keys(callSignInformationWithKey);
+                    const callSignFinalInformation   = callSignInformationWithKey[String(callSignKey[0])];
+                    if(String(callSignFinalInformation.Organization) == String(data.Organization)){
+                        this.setState({loadingMessage : 'Invalid! Call sign already exists in the organization'});
+                        setTimeout(()=>{
+                            this.setState({loadingMessage:''});
+                        },Constants.ERROR_DISPLAY_TIME);
+                    }
+                    else{
+                        const firebaseKey =     firebase
+                                                    .database()
+                                                    .ref("CallSigns")
+                                                    .push();
+                        firebaseKey
+                            .update({
+                                'ID'   : data.ID,
+                                'Name' : data.Name,
+                                'Organization' : data.Organization,
+                                'status' : Constants.CALL_SIGN_STATUS.NOT_TAKEN
+                            })
+                            .then(()=>{
+                                this.setState({loadingMessage : 'Successfully added call sign information'});
+                                setTimeout(()=>{
+                                    this.setState({loadingMessage:''});
+                                },Constants.ERROR_DISPLAY_TIME);
+                            });
+                    }
+                }
+                else{
+                    const firebaseKey =     firebase
+                                                .database()
+                                                .ref("CallSigns")
+                                                .push();
+                    firebaseKey
+                        .update({
+                            'ID'   : data.ID,
+                            'Name' : data.Name,
+                            'Organization' : data.Organization,
+                            'status' : Constants.CALL_SIGN_STATUS.NOT_TAKEN
+                        })
+                        .then(()=>{
+                            this.setState({loadingMessage : 'Successfully added call sign information'});
+                            setTimeout(()=>{
+                                this.setState({loadingMessage:''});
+                            },Constants.ERROR_DISPLAY_TIME);
+                        });
+                }
             })
-            .then(()=>{
-
+            .catch((error)=>{
+                console.log(error);
+                this.setState({loadingMessage : 'Error connecting to server'});
+                setTimeout(()=>{
+                    this.setState({loadingMessage:''});
+                },Constants.ERROR_DISPLAY_TIME);
             });
     }
 
@@ -203,6 +255,10 @@ class App extends Component {
         }
     }
 
+    setLoadingText = (text)=>{
+        this.setState({loadingMessage:text});
+    }
+
     applicationMainDisplay = ()=>{
         switch(this.state.applicationOperation){
             case Constants.PAGES.LOGIN_PAGE:
@@ -216,7 +272,9 @@ class App extends Component {
                             doChangePopUpContent       = {this.changePopUpContent}
                             doSubmitModifiedCenter     = {this.submitModifiedCenterRange}
                             doSubmitNewOrganization    = {this.submitNewOrganization}
-                            doLogoutAdminCredentials   = {this.logoutAdminCredentials} />;
+                            doSubmitNewCallSign        = {this.submitNewCallSign}
+                            doLogoutAdminCredentials   = {this.logoutAdminCredentials}
+                            doSetLoadingMessage        = {this.setLoadingText} />;
         }
     }
 

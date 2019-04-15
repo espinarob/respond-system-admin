@@ -3,6 +3,11 @@ const Constants = {
 		LOGIN_PAGE      : 'LOGIN_PAGE',
 		ADMIN_HOME_PAGE : 'ADMIN_HOME_PAGE' 
 	},
+	DATA_CLICKED                : {
+		BYSTANDERS              : 'BYSTANDERS',
+		RESPONDERS              : 'RESPONDERS',
+		INCIDENTS               : 'INCIDENTS'
+	},
 	FIRE_BASE_CONFIG            : {
 		apiKey                  : "AIzaSyAUFpo4C2jL_ABEAQUJXkHXNwOCc4IMFT8",
 	    authDomain              : "resys-respondsystem.firebaseapp.com",

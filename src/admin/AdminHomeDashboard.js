@@ -11,7 +11,8 @@ import {
     IoIosPeople,
 	IoMdLogIn,
 	IoMdSettings,
-	IoIosOptions
+	IoIosOptions,
+    IoMdCloseCircle
 	} 
     from "react-icons/io";
 
@@ -22,13 +23,21 @@ import './AdminHomeDashboard.css';
 class AdminHomeDashboard extends Component {
 
 	state = {
-        newRadius       : '',
-        newLatitude     : '',
-        newLongitude    : '',
-        currentRange    : '',
-        newOrganization : '',
-        newCallSignID   : '',
-        newResponder    : ''
+        dataChosen             : Constants.DATA_CLICKED.BYSTANDERS,
+        allAccounts            : [],
+        allIncident            : [],
+        loadingAccounts        : true,
+        loadingIncidents       : true,
+        viewClicked            : false,
+        firebaseAccountsObject : '',
+        newRadius              : '',
+        newLatitude            : '',
+        newLongitude           : '',
+        currentRange           : '',
+        newOrganization        : '',
+        selectedOrganization   : '',
+        newCallSignID          : '',
+        newResponder           : ''
     }
 
     handleInputRadius = (event)=>{
@@ -79,7 +88,7 @@ class AdminHomeDashboard extends Component {
     }
 
     manipulateSelectedOrg = (event)=>{
-        console.log(event);
+        this.setState({selectedOrganization:event.target.value});
     }
 
     addNewCallSign = ()=>{
@@ -90,7 +99,12 @@ class AdminHomeDashboard extends Component {
             alert('Please input a responder name!');
         }
         else{
-
+            const data = {
+                ID: String(this.state.newCallSignID),
+                Name : String(this.state.newResponder),
+                Organization: String(this.state.selectedOrganization)
+            }
+            this.props.doSubmitNewCallSign(data);
         }
     }
 
@@ -174,6 +188,7 @@ class AdminHomeDashboard extends Component {
                     const finalSelectContent  = organizationName.map((org)=>{
                         return <option key = {org.Name} value={org.Name}>{org.Name}</option>
                     });
+                    this.setState({selectedOrganization:organizationName[0].Name});
                     content = 
                         <React.Fragment>
                             <div id = 'AvailableOrganizationWrapper'>
@@ -233,6 +248,391 @@ class AdminHomeDashboard extends Component {
         this.props.doChangePopUpContent(content);
     }
 
+    componentDidMount(){
+        this.listenToAccountsData();
+    }
+
+    componentWillUnmount(){
+        this.props.doGetFirebaseObject
+            .database()
+            .ref("Accounts")
+            .off("value",this.state.firebaseAccountsObject);
+    }
+
+    listenToAccountsData = ()=>{
+        const firebaseAccountsObject =  this.props.doGetFirebaseObject
+                                            .database()
+                                            .ref("Accounts")
+                                            .on("value",snapshot=>{
+                                                if(snapshot.exists()){
+                                                    const allAccountsWithKey = JSON.parse(JSON.stringify(snapshot.val()));
+                                                    const initAllAccounts    = [];
+                                                    Object
+                                                        .keys(allAccountsWithKey)
+                                                        .forEach((accKey)=>{   
+                                                            initAllAccounts.push(allAccountsWithKey[accKey]);
+                                                        });
+                                                    this.setState({allAccounts:initAllAccounts});
+                                                    this.setState({loadingAccounts:false});
+                                                }
+                                            });
+        this.setState({firebaseAccountsObject:firebaseAccountsObject})
+    }
+
+    displayListsOfBystanders = ()=>{
+        return this.state.allAccounts.map((account)=>{
+            if(account.role == 'CIVILIAN'){
+                return  <div style ={{
+                                height: '12%',
+                                width: '98%',
+                                position:'relative',
+                                borderBottom: 'solid',
+                                marginTop: '10px'
+                        }}
+                        key = {account.key}>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '13%',
+                                fontSize: '13px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Name - '+account.fullName}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '18%',
+                                marginLeft: '3px',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Address - '+account.address}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '5%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Gender - '+account.gender}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '10%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Mobile - '+account.phoneNumber}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '15%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'e-mail - '+account.email}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '10%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'birthday - '+account.birthday}
+                            </p>
+
+                            <p  
+                                onClick = {()=>this.toggleBlockUser(account)}
+                                id = 'toggleBlockButton' 
+                                style ={{
+                                    height: '50%',
+                                    width: '12%',
+                                    border: 'solid',
+                                    borderRadius: '10px',
+                                    fontSize: '13px',
+                                    fontFamily: 'Nunito-Regular',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                    paddingTop: '5px',
+                                    display: 'inline-block',
+                                    position: 'relative',
+                                    left: '12%',
+                                    cursor: 'pointer'
+                                }}>
+                                {
+                                    account.accountStatus  == 'NOT_BLOCKED' ?
+                                    'Block user' : 'Unblock user'
+                                }
+                            </p>
+                        </div>;
+            }
+        });
+    }
+
+    toggleBlockUser = (account)=>{
+        this.props.doSetLoadingMessage( 
+            (account.accountStatus == 'BLOCKED' ? 
+            'Unblocking user, please wait..': 'Blocking user, please wait..'
+            ));
+        this.props.doGetFirebaseObject
+            .database()
+            .ref("Accounts/"+String(account.key))
+            .update({
+                'accountStatus' : (account.accountStatus == 'BLOCKED' ? 
+                    'NOT_BLOCKED' : 'BLOCKED')
+            })
+            .then(()=>{
+                this.props.doSetLoadingMessage( 
+                    (account.accountStatus == 'BLOCKED' ? 
+                    'Successfully unblocked user account': 'Successfully blocked user account'
+                    ));
+                setTimeout(()=>{
+                    this.props.doSetLoadingMessage('');
+                },Constants.ERROR_DISPLAY_TIME);
+            })
+            .catch((error)=>{
+                this.props.doSetLoadingMessage('Error connecting to the server');
+                setTimeout(()=>{
+                    this.props.doSetLoadingMessage('');
+                },Constants.ERROR_DISPLAY_TIME);
+            });
+    }
+
+    openClickView = ()=>{
+        this.setState({viewClicked:true});
+    }
+
+    closeClickView = ()=>{
+        this.setState({viewClicked:false});
+    }
+
+    displayListsOfResponders = ()=>{
+        return this.state.allAccounts.map((account)=>{
+            if(account.role == 'RESPONDER'){
+                return  <div style ={{
+                                height: '12%',
+                                width: '98%',
+                                position:'relative',
+                                borderBottom: 'solid',
+                                marginTop: '10px'
+                        }}
+                        key = {account.key}>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '13%',
+                                fontSize: '13px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Name - '+account.fullName}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '18%',
+                                marginLeft: '3px',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Address - '+account.address}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '5%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Gender - '+account.gender}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '10%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'Mobile - '+account.phoneNumber}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '15%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'e-mail - '+account.email}
+                            </p>
+                            <p style ={{
+                                height:'98%',
+                                textAlign:'center',
+                                marginTop: '0 auto',
+                                textAlignVertical: 'center',
+                                display: 'inline-block',
+                                position:'relative',
+                                width: '10%',
+                                fontSize: '12px',
+                                fontFamily: 'Nunito-Regular'
+                            }}>
+                                {'birthday - '+account.birthday}
+                            </p>
+
+                            <p  
+                                onClick = {()=>this.toggleBlockUser(account)}
+                                id = 'toggleBlockButton' 
+                                style ={{
+                                    height: '50%',
+                                    width: '10%',
+                                    border: 'solid',
+                                    borderRadius: '10px',
+                                    fontSize: '12px',
+                                    fontFamily: 'Nunito-Regular',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                    paddingTop: '5px',
+                                    display: 'inline-block',
+                                    position: 'relative',
+                                    left: '5%',
+                                    cursor: 'pointer'
+                                }}>
+                                {
+                                    account.accountStatus  == 'NOT_BLOCKED' ?
+                                    'Block user' : 'Unblock user'
+                                }
+                            </p>
+                            <p  
+                                onClick = {()=>this.openClickView()}
+                                id = 'toggleBlockButton' 
+                                style ={{
+                                    height: '50%',
+                                    width: '10%',
+                                    border: 'solid',
+                                    borderRadius: '10px',
+                                    fontSize: '13px',
+                                    fontFamily: 'Nunito-Regular',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                    paddingTop: '5px',
+                                    display: 'inline-block',
+                                    position: 'relative',
+                                    left: '6%',
+                                    cursor: 'pointer'
+                            }}>
+                                View
+                            </p>
+                        </div>;
+            }
+        });
+    }
+
+    displayChosenData = ()=>{
+        if(this.state.dataChosen == Constants.DATA_CLICKED.BYSTANDERS){
+            return  <React.Fragment>
+                        {
+                            this.state.loadingAccounts == true ? 
+                            <p style ={{
+                                width: '50%',
+                                height: '10%',
+                                position: 'relative',
+                                top:'45%',
+                                fontSize: '15px',
+                                textAlign:'center',
+                                fontFamily: 'Nunito-Regular',
+                                margin: '0 auto'
+                            }}>
+                                {'Loading data...'}
+                            </p>:
+                            <React.Fragment>
+                                {this.displayListsOfBystanders()}
+                            </React.Fragment>
+                        }
+                    </React.Fragment>;
+        }
+        else if(this.state.dataChosen == Constants.DATA_CLICKED.RESPONDERS){
+            return  <React.Fragment>
+                        {
+                            this.state.loadingAccounts == true ? 
+                            <p style ={{
+                                width: '50%',
+                                height: '10%',
+                                position: 'relative',
+                                top:'45%',
+                                fontSize: '15px',
+                                textAlign:'center',
+                                fontFamily: 'Nunito-Regular',
+                                margin: '0 auto'
+                            }}>
+                                {'Loading data...'}
+                            </p>:
+                            <React.Fragment>
+                                {this.displayListsOfResponders()}
+                            </React.Fragment>
+                        }
+                    </React.Fragment>;
+        }
+    }
+
+
+    showResponders = ()=>{
+        this.setState({dataChosen:Constants.DATA_CLICKED.RESPONDERS});
+        document.getElementById('RespondersButtonSection').style.borderBottom = 'solid';
+        document.getElementById('BystandersButtonSection').style.borderBottom = 'none';
+    }
+
+    showBystanders = ()=>{
+        this.setState({dataChosen:Constants.DATA_CLICKED.BYSTANDERS});
+        document.getElementById('BystandersButtonSection').style.borderBottom = 'solid';
+        document.getElementById('RespondersButtonSection').style.borderBottom = 'none';
+    }
 
     operatePopUpContent = (operation)=>{
         switch(operation){
@@ -249,6 +649,59 @@ class AdminHomeDashboard extends Component {
                 this.displayAddCallSignsContent();
                 return;
         }
+    }
+
+
+    displayClickViewed = ()=>{
+        if(this.state.viewClicked){
+            return  <div 
+                        id = 'ViewDataWrapper'
+                        style ={{
+                            height: '80%',
+                            left: '30%',
+                            width: '40%',
+                            position: 'absolute',
+                            top: '5%',
+                            borderRadius :'10px',
+                            backgroundColor: '#fff',
+                            overflow : 'scroll',
+                            overflowX :'hidden'
+                    }}>
+                        <p 
+                            onClick = {()=>this.closeClickView()}
+                            style = {{
+                                height: '6%',
+                                width: '6%',
+                                fontSize: '16px',
+                                textAlign: 'center',
+                                color: '#000',
+                                cursor: 'pointer',
+                                position: 'absolute',
+                                left :'2%',
+                                top: '2%'
+                            }}>
+                            <IoMdCloseCircle/>
+                        </p>
+                        <div
+                            style ={{
+                                height: '100%',
+                                width: '95%',
+                                left: '3%',
+                                position:'relative',
+                                top:'9%'
+                            }}>
+                            {
+                                this.state.dataChosen == Constants.DATA_CLICKED.RESPONDERS ? 
+                                <React.Fragment>
+
+                                </React.Fragment>:
+                                <React.Fragment>
+                                </React.Fragment> 
+                            }
+                        </div>
+                    </div>
+        }
+        else return;
     }
 
 	render() {
@@ -309,6 +762,21 @@ class AdminHomeDashboard extends Component {
         				</div>
         			</div>
         			<div id = 'AdminDataSection'>
+                        <div id = 'DataChoiceHeader'>
+                            <p id = 'BystandersButtonSection' onClick={()=>this.showBystanders()} >
+                                Bystanders
+                            </p>
+                            <p id = 'RespondersButtonSection' onClick={()=>this.showResponders()} >
+                                Responders
+                            </p>
+                            <p id = 'IncidentButtonSection'>
+                                Incidents
+                            </p>
+                        </div>
+                        <div id  = 'AdminContentDataWrapper'>
+                            {this.displayChosenData()}
+                            {this.displayClickViewed()}
+                        </div>
         			</div>
         		</div>
         	</div>
