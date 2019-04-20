@@ -12,7 +12,8 @@ import {
 	IoMdLogIn,
 	IoMdSettings,
 	IoIosOptions,
-    IoMdCloseCircle
+    IoMdCloseCircle,
+    IoIosNotifications
 	} 
     from "react-icons/io";
 
@@ -37,7 +38,9 @@ class AdminHomeDashboard extends Component {
         newOrganization        : '',
         selectedOrganization   : '',
         newCallSignID          : '',
-        newResponder           : ''
+        newResponder           : '',
+        clickedDetails         : {},
+        clickedAddressName     : ''
     }
 
     handleInputRadius = (event)=>{
@@ -164,7 +167,7 @@ class AdminHomeDashboard extends Component {
     }
 
     displayAddCallSignsContent = ()=>{
-         let content = 
+        let content = 
             <React.Fragment>
                 <p id = 'LoggerSectionWrapper'>
                     Loading data, please wait..
@@ -246,7 +249,89 @@ class AdminHomeDashboard extends Component {
             </React.Fragment>;
         this.props.doTogglePopUpContent();
         this.props.doChangePopUpContent(content);
+
     }
+
+    displayLoginsMade = ()=>{
+        let content = 
+            <React.Fragment>
+                <p id = 'LoggerSectionWrapper'>
+                    Loading data, please wait..
+                </p>
+            </React.Fragment>;
+        this.props.doTogglePopUpContent();
+        this.props.doChangePopUpContent(content);
+
+        this.props.doGetFirebaseObject
+            .database()
+            .ref("LOGINS_MADE")
+            .on("value",snapshot=>{
+                if(snapshot.exists()){
+                    const allLoginsMadeWithKey = JSON.parse(JSON.stringify(snapshot.val()));
+                    const loginsMadeData       = [];
+                    Object
+                        .keys(allLoginsMadeWithKey)
+                        .forEach((loginKey)=>{
+                            loginsMadeData.push(allLoginsMadeWithKey[loginKey]);
+                        });
+                    const title =   <p style ={{
+                                        height: '25px',
+                                        position: 'relative',
+                                        fontSize: '11px',
+                                        fontWeight: 'bold',
+                                        textAlign:'center',
+                                        width: '100%'
+                                    }}>
+                                        {'Logins History'}
+                                    </p>
+
+                    const data = loginsMadeData.map((login)=>{
+                        return  <div style ={{
+                                        height: '85px',
+                                        width: '90%',
+                                        left: '5%',
+                                        position:'relative'
+                                }}>
+                                    <p style ={{
+                                            height: '26.5%',
+                                            fontSize: '9px',
+                                            width:'70%',
+                                            position: 'relative',
+                                            paddingLeft: '5%'
+                                    }}>
+                                        {'Date: '+login.date}
+                                    </p>
+                                    <p style ={{
+                                            height: '46%',
+                                            fontSize: '11px',
+                                            width:'95%',
+                                            paddingLeft: '5%',
+                                            position: 'relative',
+                                            borderBottom : 'solid'
+                                    }}>
+                                        {'Location: '+login.location}
+                                    </p>
+                                </div>
+
+                    });
+                    content =   <React.Fragment>
+                                    {title}
+                                    {data}
+                                </React.Fragment>
+                    this.props.doChangePopUpContent(content);
+                }
+                else{
+                    content = 
+                        <React.Fragment>
+                            <p id = 'LoggerSectionWrapper'>
+                                No logins history
+                            </p>
+                        </React.Fragment>;
+                    this.props.doChangePopUpContent(content);
+                }
+            });
+    }
+
 
     componentDidMount(){
         this.listenToAccountsData();
@@ -427,8 +512,9 @@ class AdminHomeDashboard extends Component {
             });
     }
 
-    openClickView = ()=>{
+    openClickView = (details)=>{
         this.setState({viewClicked:true});
+        this.setState({clickedDetails:details});
     }
 
     closeClickView = ()=>{
@@ -550,7 +636,7 @@ class AdminHomeDashboard extends Component {
                                 }
                             </p>
                             <p  
-                                onClick = {()=>this.openClickView()}
+                                onClick = {()=>this.openClickView(account)}
                                 id = 'toggleBlockButton' 
                                 style ={{
                                     height: '50%',
@@ -648,12 +734,18 @@ class AdminHomeDashboard extends Component {
             case Constants.POP_UP_CONTENT.ADD_CALL_SIGNS:
                 this.displayAddCallSignsContent();
                 return;
+            case Constants.POP_UP_CONTENT.LOGINS_MADE:
+                this.displayLoginsMade();
+                return;
         }
     }
 
 
     displayClickViewed = ()=>{
         if(this.state.viewClicked){
+            if(this.state.clickedDetails.responding)this.getAddressName(
+                this.state.clickedDetails.responding.userLatitude,
+                this.state.clickedDetails.responding.userLongitude);
             return  <div 
                         id = 'ViewDataWrapper'
                         style ={{
@@ -693,7 +785,78 @@ class AdminHomeDashboard extends Component {
                             {
                                 this.state.dataChosen == Constants.DATA_CLICKED.RESPONDERS ? 
                                 <React.Fragment>
-
+                                    <p style ={{
+                                            height: '5%',
+                                            width: '100%',
+                                            position: 'relative',
+                                            textAlign: 'center',
+                                            fontSize: '14px'
+                                    }}>
+                                        {'Organization: '+this.state.clickedDetails.organization}
+                                    </p>
+                                    <p style ={{
+                                            height: '5%',
+                                            width: '100%',
+                                            position: 'relative',
+                                            textAlign: 'center',
+                                            fontSize: '14px'
+                                    }}>
+                                        {'Call Sign: '+this.state.clickedDetails.callSign}
+                                    </p>
+                                    {
+                                        this.state.clickedDetails.responding ? 
+                                        <p style ={{
+                                                height: '5%',
+                                                width: '100%',
+                                                position: 'relative',
+                                                textAlign: 'center',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold'
+                                        }}>
+                                            {'Currently Responding'} 
+                                        </p>:
+                                        <p style ={{
+                                                height: '5%',
+                                                width: '100%',
+                                                position: 'relative',
+                                                textAlign: 'center',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold'
+                                        }}>
+                                            {'Not responding'} 
+                                        </p>
+                                    }
+                                    {
+                                        this.state.clickedDetails.responding ? 
+                                        <React.Fragment>
+                                            <p
+                                                style = {{
+                                                    height: '5%',
+                                                    width: '100%',
+                                                    textAlign: 'center',
+                                                    fontSize: '14px',
+                                                    position: 'relative'
+                                                }}>
+                                                {'Incident: '+this.state.clickedDetails.responding.incidentType}
+                                            </p>
+                                            <p
+                                                style = {{
+                                                    height: '15%',
+                                                    width: '100%',
+                                                    textAlign: 'center',
+                                                    fontSize: '13px',
+                                                    position: 'relative',
+                                                    top: '3%'
+                                                }}>
+                                                {'Location: '+
+                                                    (this.state.clickedAddressName ?
+                                                        this.state.clickedAddressName: 'Getting location..')
+                                                }
+                                            </p>
+                                        </React.Fragment>:
+                                        <React.Fragment>
+                                        </React.Fragment>
+                                    }
                                 </React.Fragment>:
                                 <React.Fragment>
                                 </React.Fragment> 
@@ -702,6 +865,20 @@ class AdminHomeDashboard extends Component {
                     </div>
         }
         else return;
+    }
+
+    getAddressName = (latitude,longitude)=>{
+        fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+
+                latitude +
+                '&lon=' +
+                longitude)
+            .then(response =>response.json())
+            .then((responseData)=>{
+                this.setState({
+                    clickedAddressName : responseData.display_name
+                });
+            })
+            .catch(error => console.log(error));
     }
 
 	render() {
@@ -743,7 +920,7 @@ class AdminHomeDashboard extends Component {
         				</div>
 
 
-        				<div id = 'LoginsMadeWrapper'>
+        				<div id = 'LoginsMadeWrapper' onClick={()=>this.operatePopUpContent(Constants.POP_UP_CONTENT.LOGINS_MADE)} >
         					<p id = 'LoginsMadeIcon'>
         						<IoMdLogIn/>
         					</p>
@@ -751,6 +928,10 @@ class AdminHomeDashboard extends Component {
         						Logins Made
         					</p>
         				</div>
+
+                        <p id = 'AlarmWrapper'>
+                            <IoIosNotifications/>
+                        </p>
 
         				<div id = 'OptionsWrapper' onClick={()=>this.operatePopUpContent(Constants.POP_UP_CONTENT.OPTIONS)} >
         					<p id = 'OptionsIcon'>

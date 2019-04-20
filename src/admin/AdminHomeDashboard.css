@@ -145,12 +145,12 @@
 	font-family: 'Nunito-Regular';
 }
 #LoginsMadeWrapper{
-	width: 150px;
+	width: 130px;
 	height: 100%;
 	position: relative;
 	display: inline-block;
 	cursor: pointer;
-	left: 30px;
+	left: 25px;
 }
 #LoginsMadeIcon{
 	width:20%;
@@ -172,13 +172,25 @@
 	display: inline-block;
 	font-family: 'Nunito-Regular';
 }
+#AlarmWrapper{
+	width: 50px;
+	height: 80%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	left: 27px;
+	text-align: center;
+	font-size: 30px;
+	font-weight: bold;
+	padding-top: 5px;
+}
 #OptionsWrapper{
 	width: 110px;
 	height: 100%;
 	position: relative;
 	display: inline-block;
 	cursor: pointer;
-	left: 110px;
+	left: 95px;
 }
 #OptionsIcon{
 	width:25%;

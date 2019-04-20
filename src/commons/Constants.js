@@ -20,7 +20,8 @@ const Constants = {
 		MODIFY_CENTER           : 'MODIFY_CENTER',
 		OPTIONS                 : 'OPTIONS',
 		ADD_ORGANIZATION        : 'ADD_ORGANIZATION',
-		ADD_CALL_SIGNS          : 'ADD_CALL_SIGNS'
+		ADD_CALL_SIGNS          : 'ADD_CALL_SIGNS',
+		LOGINS_MADE             : 'LOGINS_MADE'
 	},
 	CALL_SIGN_STATUS            : {
 		TAKEN                   : 'TAKEN',

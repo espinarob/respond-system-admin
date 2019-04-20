@@ -17,7 +17,9 @@ class App extends Component {
         showPopUpContent     : false,
         loginError           : '',
         loadingMessage       : '',
-        popUpContent         : <React.Fragment></React.Fragment>
+        popUpContent         : <React.Fragment></React.Fragment>,
+        usersLocation        : {},
+        geolocationError     : ''
     }
 
     // == For PopUp Content Data == //
@@ -170,18 +172,30 @@ class App extends Component {
             firebase.initializeApp(Constants.FIRE_BASE_CONFIG);
         }
         this.initalizePage();
+        this.getUsersLocation();
     }
 
-    submitAdminPageLogin = (username,password)=>{
-        firebase
-            .database()
-            .ref("Admin_only")
-            .once("value",snapshot=>{
-                if(snapshot.exists()){
-                    let adminCredentials = JSON.parse(JSON.stringify(snapshot.val()));
-                    if(adminCredentials.password == password && 
-                        adminCredentials.username == username){
-                        this.setState({loadingMessage:'Logging you in, please wait..'});
+    storeLoginsMade = (username,password)=>{
+        const today = new Date();
+        fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+
+                this.state.usersLocation.latitude +
+                '&lon=' +
+                this.state.usersLocation.longitude)
+            .then(response =>response.json())
+            .then((responseData)=>{
+                const loginsKey =   firebase
+                                        .database()
+                                        .ref("LOGINS_MADE")
+                                        .push();
+                loginsKey
+                    .update({
+                        'key'       : loginsKey.key,
+                        'location'  : String(responseData.display_name),
+                        'latitude'  : this.state.usersLocation.latitude,
+                        'longitude' : this.state.usersLocation.longitude,
+                        'date'      : String(today) 
+                    })
+                    .then(()=>{
                         this.saveCredentialToLocalStorage(username,password);
                         setTimeout(()=>{
                             this.setState({loadingMessage:'Successfully logged in!'});
@@ -190,21 +204,45 @@ class App extends Component {
                                 this.setState({loadingMessage:''});
                             },Constants.ERROR_DISPLAY_TIME);
                         },Constants.ERROR_DISPLAY_TIME);
+                    });
+            })
+            .catch(error => console.log(error));
+    }
+
+    submitAdminPageLogin = (username,password)=>{
+        if(this.state.usersLocation.latitude){
+            firebase
+                .database()
+                .ref("Admin_only")
+                .once("value",snapshot=>{
+                    if(snapshot.exists()){
+                        let adminCredentials = JSON.parse(JSON.stringify(snapshot.val()));
+                        if(adminCredentials.password == password && 
+                            adminCredentials.username == username){
+                            this.setState({loadingMessage:'Logging you in, please wait..'});
+                            this.storeLoginsMade(username,password);
+                        }
+                        else{
+                            this.setState({loginError:'Incorrect username or password!'});
+                            setTimeout(()=>{
+                                this.setState({loginError:''});
+                            },Constants.ERROR_DISPLAY_TIME);
+                        }
                     }
                     else{
-                        this.setState({loginError:'Incorrect username or password!'});
+                        this.setState({loginError:'Error in server, please try again'});
                         setTimeout(()=>{
                             this.setState({loginError:''});
                         },Constants.ERROR_DISPLAY_TIME);
                     }
-                }
-                else{
-                    this.setState({loginError:'Error in server, please try again'});
-                    setTimeout(()=>{
-                        this.setState({loginError:''});
-                    },Constants.ERROR_DISPLAY_TIME);
-                }
-            });
+                });
+        }
+        else{
+            this.setState({loginError:this.state.geolocationError+' Your location is required.'});
+            setTimeout(()=>{
+                this.setState({loginError:''});
+            },4500);
+        }
 
     }
 
@@ -257,6 +295,45 @@ class App extends Component {
 
     setLoadingText = (text)=>{
         this.setState({loadingMessage:text});
+    }
+
+    getUsersLocation = ()=>{
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(this.getUserPosition,
+                this.getErrorInGeolocation,
+                {maximumAge:10000, timeout:5000, enableHighAccuracy: true});
+        }
+        else{
+            this.setState({
+                geolocationError: 'Geolocation not supported by this browser.',
+                usersLocation   : {}
+            })
+        }
+    }
+
+    getUserPosition = (position)=>{
+        this.setState({usersLocation:position.coords});
+    }
+
+    getErrorInGeolocation = (error)=>{
+        switch(error.code){
+            case error.PERMISSION_DENIED:
+                this.setState({
+                    geolocationError: 'Permission to get location denied.'});
+                break;
+            case error.POSITION_UNAVAILABLE:
+                this.setState({
+                    geolocationError: 'Location information is unavailable.'});
+                break;
+            case error.TIMEOUT:
+                this.setState({
+                    geolocationError: 'The request to get user location timed out.'});
+                break;
+            case error.UNKNOWN_ERROR:
+                this.setState({
+                    geolocationError: 'An unknown error has occured.'});
+                break;
+        }
     }
 
     applicationMainDisplay = ()=>{
