@@ -344,6 +344,7 @@ class App extends Component {
                             doGetLoginError            = {this.state.loginError} />;
             case Constants.PAGES.ADMIN_HOME_PAGE:
                 return <AdminHomeDashboard
+                            usersLocation              = {this.state.usersLocation}
                             doGetFirebaseObject        = {firebase}
                             doTogglePopUpContent       = {this.togglePopUpContent}
                             doChangePopUpContent       = {this.changePopUpContent}

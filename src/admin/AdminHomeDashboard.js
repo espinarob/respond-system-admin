@@ -16,7 +16,7 @@ import {
     IoIosNotifications
 	} 
     from "react-icons/io";
-
+import GoogleMapReact from 'google-map-react'; 
 /* -- Custom made components -- */
 import Constants      from '../commons/Constants.js';
 import './AdminHomeDashboard.css';
@@ -24,24 +24,25 @@ import './AdminHomeDashboard.css';
 class AdminHomeDashboard extends Component {
 
 	state = {
-        dataChosen             : Constants.DATA_CLICKED.BYSTANDERS,
-        allAccounts            : [],
-        allIncident            : [],
-        loadingAccounts        : true,
-        loadingIncidents       : true,
-        viewClicked            : false,
-        firebaseAccountsObject : '',
-        newRadius              : '',
-        newLatitude            : '',
-        newLongitude           : '',
-        currentRange           : '',
-        newOrganization        : '',
-        selectedOrganization   : '',
-        newCallSignID          : '',
-        newResponder           : '',
-        clickedDetails         : {},
-        clickedAddressName     : ''
-    }
+        dataChosen              : Constants.DATA_CLICKED.BYSTANDERS,
+        allAccounts             : [],
+        allIncident             : [],
+        loadingAccounts         : true,
+        loadingIncidents        : true,
+        viewClicked             : false,
+        firebaseAccountsObject  : '',
+        firebaseIncidentsObject : '',
+        newRadius               : '',
+        newLatitude             : '',
+        newLongitude            : '',
+        currentRange            : '',
+        newOrganization         : '',
+        selectedOrganization    : '',
+        newCallSignID           : '',
+        newResponder            : '',
+        clickedDetails          : {},
+        clickedAddressName      : ''
+    } 
 
     handleInputRadius = (event)=>{
         this.setState({newRadius:event.target.value});
@@ -335,6 +336,7 @@ class AdminHomeDashboard extends Component {
 
     componentDidMount(){
         this.listenToAccountsData();
+        this.listenToIncidentsData();
     }
 
     componentWillUnmount(){
@@ -342,6 +344,10 @@ class AdminHomeDashboard extends Component {
             .database()
             .ref("Accounts")
             .off("value",this.state.firebaseAccountsObject);
+         this.props.doGetFirebaseObject
+            .database()
+            .ref("Reports")
+            .off("value",this.state.firebaseIncidentsObject);
     }
 
     listenToAccountsData = ()=>{
@@ -362,6 +368,26 @@ class AdminHomeDashboard extends Component {
                                                 }
                                             });
         this.setState({firebaseAccountsObject:firebaseAccountsObject})
+    }
+
+    listenToIncidentsData = ()=>{
+        const firebaseIncidentsObject =     this.props.doGetFirebaseObject
+                                                .database()
+                                                .ref("Reports")
+                                                .on("value",snapshot=>{
+                                                    if(snapshot.exists()){
+                                                        const allIncidentsWithKey = JSON.parse(JSON.stringify(snapshot.val()));
+                                                        const initAllIncidents    = [];
+                                                        Object
+                                                            .keys(allIncidentsWithKey)
+                                                            .forEach((incidentKey)=>{
+                                                                initAllIncidents.push(allIncidentsWithKey[incidentKey]);
+                                                            });
+                                                        this.setState({allIncident:initAllIncidents});
+                                                        this.setState({loadingIncidents:false});
+                                                    }
+                                                });
+        this.setState({firebaseIncidentsObject:firebaseIncidentsObject});
     }
 
     displayListsOfBystanders = ()=>{
@@ -519,6 +545,31 @@ class AdminHomeDashboard extends Component {
 
     closeClickView = ()=>{
         this.setState({viewClicked:false});
+    }
+
+    showUsersLocation = ()=>{
+        const UserLocationComponent = ({text})=> <div>{text}</div>;
+        return  <UserLocationComponent
+                    lat = {this.props.usersLocation.latitude}
+                    lng = {this.props.usersLocation.longitude}
+                    text = {"Your location"}/>
+    }
+
+    displayMapOfIncidents = ()=>{
+        return  <div style ={{
+                        height: '100%',
+                        width: '99%',
+                        position: 'relative'
+                }}>
+                    <GoogleMapReact
+                        bootstrapURLKeys={{ key:Constants.JAVASCRIPT_MAP_KEY }}
+                        defaultCenter={{
+                            lat: this.props.usersLocation.latitude,
+                            lng: this.props.usersLocation.longitude
+                        }}
+                      defaultZoom={15}>
+                    </GoogleMapReact>
+                </div>
     }
 
     displayListsOfResponders = ()=>{
@@ -705,6 +756,28 @@ class AdminHomeDashboard extends Component {
                         }
                     </React.Fragment>;
         }
+        else if(this.state.dataChosen == Constants.DATA_CLICKED.INCIDENTS){
+            return  <React.Fragment>
+                        {
+                            this.state.loadingIncidents == true ?
+                            <p style ={{
+                                width: '50%',
+                                height: '10%',
+                                position: 'relative',
+                                top:'45%',
+                                fontSize: '15px',
+                                textAlign:'center',
+                                fontFamily: 'Nunito-Regular',
+                                margin: '0 auto'
+                            }}>
+                                {'Loading data...'}
+                            </p>:
+                            <React.Fragment>
+                                {this.displayMapOfIncidents()}
+                            </React.Fragment>
+                        }
+                    </React.Fragment>
+        }
     }
 
 
@@ -712,12 +785,22 @@ class AdminHomeDashboard extends Component {
         this.setState({dataChosen:Constants.DATA_CLICKED.RESPONDERS});
         document.getElementById('RespondersButtonSection').style.borderBottom = 'solid';
         document.getElementById('BystandersButtonSection').style.borderBottom = 'none';
+        document.getElementById('IncidentButtonSection').style.borderBottom   = 'none';
+        
     }
 
     showBystanders = ()=>{
         this.setState({dataChosen:Constants.DATA_CLICKED.BYSTANDERS});
         document.getElementById('BystandersButtonSection').style.borderBottom = 'solid';
         document.getElementById('RespondersButtonSection').style.borderBottom = 'none';
+        document.getElementById('IncidentButtonSection').style.borderBottom   = 'none';
+    }
+
+    showIncidents = ()=>{
+        this.setState({dataChosen:Constants.DATA_CLICKED.INCIDENTS});
+        document.getElementById('BystandersButtonSection').style.borderBottom = 'none';
+        document.getElementById('RespondersButtonSection').style.borderBottom = 'none';
+        document.getElementById('IncidentButtonSection').style.borderBottom   = 'solid';
     }
 
     operatePopUpContent = (operation)=>{
@@ -950,7 +1033,7 @@ class AdminHomeDashboard extends Component {
                             <p id = 'RespondersButtonSection' onClick={()=>this.showResponders()} >
                                 Responders
                             </p>
-                            <p id = 'IncidentButtonSection'>
+                            <p id = 'IncidentButtonSection' onClick={()=>this.showIncidents()}>
                                 Incidents
                             </p>
                         </div>

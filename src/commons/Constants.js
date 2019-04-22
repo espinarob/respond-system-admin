@@ -16,6 +16,7 @@ const Constants = {
 	    storageBucket           : "resys-respondsystem.appspot.com",
 	    messagingSenderId       : "208216134504"
 	},
+	JAVASCRIPT_MAP_KEY          : 'AIzaSyD3SzUi7kww6jLmiUz-T9BJiiqe2pW_Wjc',
 	POP_UP_CONTENT              : {
 		MODIFY_CENTER           : 'MODIFY_CENTER',
 		OPTIONS                 : 'OPTIONS',

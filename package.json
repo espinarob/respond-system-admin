@@ -3,12 +3,13 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "firebase": "^5.8.2",
+        "geolib": "^2.0.24",
+        "google-map-react": "^1.1.4",
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
         "react-icons": "^3.5.0",
-        "react-scripts": "2.1.8",
-        "firebase": "^5.8.2",
-        "geolib": "^2.0.24"
+        "react-scripts": "2.1.8"
     },
     "scripts": {
         "start": "react-scripts start",
