@@ -41,7 +41,8 @@ class AdminHomeDashboard extends Component {
         newCallSignID           : '',
         newResponder            : '',
         clickedDetails          : {},
-        clickedAddressName      : ''
+        clickedAddressName      : '',
+        pressedIncident         : {}
     } 
 
     handleInputRadius = (event)=>{
@@ -385,6 +386,7 @@ class AdminHomeDashboard extends Component {
                                                             });
                                                         this.setState({allIncident:initAllIncidents});
                                                         this.setState({loadingIncidents:false});
+                                                        console.log(initAllIncidents);
                                                     }
                                                 });
         this.setState({firebaseIncidentsObject:firebaseIncidentsObject});
@@ -548,11 +550,73 @@ class AdminHomeDashboard extends Component {
     }
 
     showUsersLocation = ()=>{
-        const UserLocationComponent = ({text})=> <div>{text}</div>;
+        const UserLocationComponent = ({text})=>
+            <div style = {{
+                    height: '25px',
+                    width: '100px'
+            }}>
+                <div style ={{
+                        height: '100%',
+                        width:'27%',
+                        position:'relative',
+                        display: 'inline-block',
+                        borderRadius: '15px',
+                        backgroundColor: '#73cc70'
+                }}>
+                </div>
+                <p style ={{
+                        height: '100%',
+                        width: '43%',
+                        left: '4%',
+                        position:'relative',
+                        display:'inline-block',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Nunito-Regular',
+                        color: '#f9020e',
+                        textAlignVertical: 'center'
+                }}>
+                    {text}
+                </p>
+            </div>;
         return  <UserLocationComponent
                     lat = {this.props.usersLocation.latitude}
                     lng = {this.props.usersLocation.longitude}
                     text = {"Your location"}/>
+    }
+
+    showAllIncidents = ()=>{
+        if(this.state.allIncident.length!=0){
+            const PinLocationTemplate = ({text,status,askHelp,currentIncident})=>
+            <div style = {{
+                    height: '25px',
+                    width: '100px'
+            }}
+            onClick = {()=>this.setState({pressedIncident:currentIncident})} >
+                <div style ={{
+                        height: '100%',
+                        width:'27%',
+                        position:'relative',
+                        display: 'inline-block',
+                        borderRadius: '15px',
+                        backgroundColor: ( askHelp ?
+                            '#e52727' : 
+                            status == Constants.REPORT_STATUS.UNRESOLVED ? 
+                                '#dd7104' : '#73cc70' )
+                }}>
+                </div>
+            </div>;
+            return this.state.allIncident.map((incident)=>{
+                return  <PinLocationTemplate
+                            currentIncident = {incident}
+                            key = {incident.key}
+                            lat = {Number(incident.userLatitude)}
+                            lng = {Number(incident.userLongitude)}
+                            text = {String(incident.reportInfo)}
+                            askHelp = {(incident.askHelp ? true : false)}
+                            status = {String(incident.reportStatus)} />
+            });
+        }
     }
 
     displayMapOfIncidents = ()=>{
@@ -561,14 +625,93 @@ class AdminHomeDashboard extends Component {
                         width: '99%',
                         position: 'relative'
                 }}>
-                    <GoogleMapReact
-                        bootstrapURLKeys={{ key:Constants.JAVASCRIPT_MAP_KEY }}
-                        defaultCenter={{
-                            lat: this.props.usersLocation.latitude,
-                            lng: this.props.usersLocation.longitude
-                        }}
-                      defaultZoom={15}>
-                    </GoogleMapReact>
+                    <div style ={{
+                            height: '100%',
+                            width: '67%',
+                            position: 'relative',
+                            display: 'inline-block'
+                    }}>
+                        <GoogleMapReact
+                            bootstrapURLKeys={{ key:Constants.JAVASCRIPT_MAP_KEY }}
+                            defaultCenter={{
+                                lat: this.props.usersLocation.latitude,
+                                lng: this.props.usersLocation.longitude
+                            }}
+                          defaultZoom={15.5}>
+                          {this.showUsersLocation()}
+                          {this.showAllIncidents()}
+                        </GoogleMapReact>
+                    </div>
+                    <div style ={{
+                            height: '100%',
+                            width: '30%',
+                            position: 'relative',
+                            display: 'inline-block',
+                            backgroundColor: '#fff'
+                    }}>
+                        {
+                            this.state.pressedIncident.reportInfo ? 
+                            <React.Fragment>
+                                <p style ={{
+                                    height: '5%',
+                                    position:'relative',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
+                                    paddingLeft: '5%',
+                                    textAlignVertical: 'center',
+                                    color: '#000',
+                                    width: '85%'
+                                }}>
+                                    {'Incident: '+this.state.pressedIncident.incidentType}
+                                </p>
+                                <p style ={{
+                                    position:'relative',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
+                                    paddingLeft: '5%',
+                                    textAlignVertical: 'center',
+                                    color: '#000',
+                                    width: '85%'
+                                }}>
+                                    {'Information: '+this.state.pressedIncident.reportInfo}
+                                </p>
+                                <p style ={{
+                                    position:'relative',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
+                                    paddingLeft: '5%',
+                                    textAlignVertical: 'center',
+                                    color: '#000',
+                                    width: '85%'
+                                }}>
+                                    {'Address: '+this.state.pressedIncident.addressName}
+                                </p>
+                                <p style ={{
+                                    position:'relative',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
+                                    paddingLeft: '5%',
+                                    textAlignVertical: 'center',
+                                    color: 'red',
+                                    width: '85%'
+                                }}>
+                                    {'Time Reported: '+this.state.pressedIncident.timeReported}
+                                </p>
+                            </React.Fragment>:
+                            <p style ={{
+                                height: '10%',
+                                position:'relative',
+                                fontSize: '13px',
+                                fontWeight: 'bold',
+                                paddingLeft: '5%',
+                                textAlignVertical: 'center',
+                                color: '#000',
+                                width: '85%'
+                            }}>
+                                {'No information'}
+                            </p>
+                        }
+                    </div>
                 </div>
     }
 
