@@ -386,7 +386,6 @@ class AdminHomeDashboard extends Component {
                                                             });
                                                         this.setState({allIncident:initAllIncidents});
                                                         this.setState({loadingIncidents:false});
-                                                        console.log(initAllIncidents);
                                                     }
                                                 });
         this.setState({firebaseIncidentsObject:firebaseIncidentsObject});
@@ -647,7 +646,8 @@ class AdminHomeDashboard extends Component {
                             width: '30%',
                             position: 'relative',
                             display: 'inline-block',
-                            backgroundColor: '#fff'
+                            backgroundColor: '#fff',
+                            paddingBottom: '50px'
                     }}>
                         {
                             this.state.pressedIncident.reportInfo ? 
@@ -665,6 +665,7 @@ class AdminHomeDashboard extends Component {
                                     {'Incident: '+this.state.pressedIncident.incidentType}
                                 </p>
                                 <p style ={{
+                                    height: '5%',
                                     position:'relative',
                                     fontSize: '13px',
                                     fontWeight: 'bold',
@@ -673,7 +674,14 @@ class AdminHomeDashboard extends Component {
                                     color: '#000',
                                     width: '85%'
                                 }}>
-                                    {'Information: '+this.state.pressedIncident.reportInfo}
+                                    {'Status: '+
+                                        (this.state.pressedIncident.reportStatus 
+                                            == Constants.REPORT_STATUS.UNRESOLVED ?
+                                            'Unresolved': 
+                                            this.state.pressedIncident.reportStatus 
+                                            == Constants.REPORT_STATUS.RESOLVED ?
+                                            'Resolved': 'Waiting for assistance')
+                                    }
                                 </p>
                                 <p style ={{
                                     position:'relative',
@@ -697,6 +705,73 @@ class AdminHomeDashboard extends Component {
                                 }}>
                                     {'Time Reported: '+this.state.pressedIncident.timeReported}
                                 </p>
+                                <p style ={{
+                                    position:'relative',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
+                                    paddingLeft: '5%',
+                                    textAlignVertical: 'center',
+                                    color: '#000',
+                                    width: '85%'
+                                }}>
+                                    {'Information: '+this.state.pressedIncident.reportInfo}
+                                </p>
+                                {
+                                    this.state.pressedIncident.reportStatus
+                                        == Constants.REPORT_STATUS.UNRESOLVED ?
+                                    <React.Fragment>
+                                        <p style ={{
+                                            position:'relative',
+                                            fontSize: '13px',
+                                            fontWeight: 'bold',
+                                            paddingLeft: '5%',
+                                            textAlignVertical: 'center',
+                                            color: '#000',
+                                            width: '85%'
+                                        }}>
+                                            {'Unresolved Report Image:'}
+                                        </p>
+                                        <img style ={{
+                                                position: 'relative',
+                                                height: '40%',
+                                                width: '100%',
+                                                objectFit: 'contain',
+                                                left: '10%',
+                                                top: '10%'
+                                        }}
+                                        src = {this.state.pressedIncident.imgURL}/>
+                                    </React.Fragment>
+                                        :
+                                    <React.Fragment></React.Fragment>
+                                }
+                                
+                                {
+                                    this.state.pressedIncident.resolved ?
+                                    <React.Fragment>
+                                        <p style ={{
+                                            position:'relative',
+                                            fontSize: '13px',
+                                            fontWeight: 'bold',
+                                            paddingLeft: '5%',
+                                            textAlignVertical: 'center',
+                                            color: '#000',
+                                            width: '85%'
+                                        }}>
+                                            {'Resolved Report Image:'}
+                                        </p>
+                                        <img style ={{
+                                                height: '40%',
+                                                width: '100%',
+                                                objectFit: 'contain',
+                                                left: '10%',
+                                                position: 'relative',
+                                                top: '10%'
+                                        }}
+                                        src = {this.state.pressedIncident.resolved.resolved_img}/>
+                                    </React.Fragment>
+                                        :
+                                    <React.Fragment></React.Fragment>
+                                }
                             </React.Fragment>:
                             <p style ={{
                                 height: '10%',
@@ -708,11 +783,75 @@ class AdminHomeDashboard extends Component {
                                 color: '#000',
                                 width: '85%'
                             }}>
-                                {'No information'}
+                                {'No pressed information'}
                             </p>
                         }
+                        <div style ={{
+                                height: '10%',
+                                position:'absolute',
+                                width: '100%',
+                                top: '353px'
+                        }}>
+                            <p 
+                                onClick = {()=>this.changeToUnresolved()}
+                                style ={{
+                                        height: '59%',
+                                        width: '30%',
+                                        top: '5%',
+                                        left: '2%',
+                                        position: 'relative',
+                                        border: 'solid',
+                                        borderRadius: '15px',
+                                        fontSize: '9px',
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                        paddingTop: '2.4%',
+                                        cursor: 'pointer',
+                                        backgroundColor: '#fff'
+                            }}>
+                                {'Change to Unresolved'}
+                            </p>
+                        </div>
                     </div>
                 </div>
+    }
+
+    changeToUnresolved = ()=>{
+        if(this.state.pressedIncident.reportStatus == Constants.REPORT_STATUS.RESOLVED){
+            this.props.doGetFirebaseObject
+                .database()
+                .ref("Reports/"
+                    +String(this.state.pressedIncident.key)
+                    +"/resolved")
+                .remove()
+                .then(()=>{
+                    this.props.doGetFirebaseObject
+                        .database()
+                        .ref("Reports/"
+                            +String(this.state.pressedIncident.key)
+                            +"/responding")
+                        .remove()
+                        .then(()=>{
+                            this.props.doGetFirebaseObject
+                                .database()
+                                .ref("Reports/"
+                                    +String(this.state.pressedIncident.key))
+                                .update({
+                                    'reportStatus' : Constants.REPORT_STATUS.UNRESOLVED
+                                })
+                                .then(()=>{
+                                    alert('Successfully updated incident information!');
+                                });
+                        });
+                });
+        }
+        else if(this.state.pressedIncident.reportStatus == Constants.REPORT_STATUS.UNRESOLVED){
+            alert('Please wait for responders to set incident to be resolved');
+        }
+        else if(this.state.pressedIncident.reportStatus == Constants.REPORT_STATUS.WAITING_FOR_AUTHORITY){
+            alert('Please send assistance to this incident');
+        }
+        else alert('Invalid Action: Please select a resolved incident to change');
     }
 
     displayListsOfResponders = ()=>{
